@@ -28,7 +28,6 @@ jobs:
       - name: Extract Android project
         run: |
           unzip -q Chess_Alomgir_Tournament_Project-1.zip -d project
-
       - name: Install Android API 37
         run: |
           SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)
@@ -37,7 +36,8 @@ jobs:
             exit 1
           fi
           yes | "$SDKMANAGER" --licenses
-          "$SDKMANAGER" "platforms;android-37"
+          "$SDKMANAGER" --install --channel=3 "platforms;android-37"
+    the  echo       ye
 
       - name: Update compileSdk to 37
         run: |
