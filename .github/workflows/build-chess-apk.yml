@@ -25,17 +25,19 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Extract Android project
         run: |
           unzip -q Chess_Alomgir_Tournament_Project-1.zip -d project
 
       - name: Install Android API 37
         run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platforms;android-37"
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)
+          if [ -z "$SDKMANAGER" ]; then
+            echo "SDK Manager not found"
+            exit 1
+          fi
+          yes | "$SDKMANAGER" --licenses
+          "$SDKMANAGER" "platforms;android-37"
 
       - name: Update compileSdk to 37
         run: |
@@ -86,3 +88,4 @@ jobs:
           name: Chess-Alomgir-Tournament-APK
           path: project/**/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+
