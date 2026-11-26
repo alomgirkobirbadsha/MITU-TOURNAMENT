@@ -46,4 +46,3 @@ jobs:
         with:
           name: Chess-Alomgir-Tournament-APK
           path: project/**/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
