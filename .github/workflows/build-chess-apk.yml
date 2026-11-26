@@ -1,0 +1,49 @@
+
+name: Build Chess Alomgir Tournament APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'Chess_Alomgir_Tournament_Project-1.zip'
+      - '.github/workflows/build-chess-apk.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Extract Android project
+        run: |
+          unzip -q Chess_Alomgir_Tournament_Project-1.zip -d project
+
+      - name: Build APK
+        run: |
+          GRADLEW=$(find project -name gradlew -type f | head -n 1)
+          if [ -z "$GRADLEW" ]; then
+            echo "Gradle wrapper not found"
+            exit 1
+          fi
+          PROJECT_DIR=$(dirname "$GRADLEW")
+          chmod +x "$GRADLEW"
+          cd "$PROJECT_DIR"
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chess-Alomgir-Tournament-APK
+          path: project/**/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
