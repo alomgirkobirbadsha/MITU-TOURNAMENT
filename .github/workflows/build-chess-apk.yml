@@ -25,9 +25,48 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Extract Android project
         run: |
           unzip -q Chess_Alomgir_Tournament_Project-1.zip -d project
+
+      - name: Install Android API 37
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platforms;android-37"
+
+      - name: Update compileSdk to 37
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          files = list(Path("project").rglob("build.gradle"))
+          files += list(Path("project").rglob("build.gradle.kts"))
+
+          patterns = [
+              (r'(compileSdk\s*=\s*)36\b', r'\g<1>37'),
+              (r'(compileSdk\s+)36\b', r'\g<1>37'),
+              (r'(compileSdkVersion\s*\(?\s*)36(\s*\)?)', r'\g<1>37\g<2>'),
+          ]
+
+          changed = []
+          for path in files:
+              old = path.read_text()
+              new = old
+              for pattern, replacement in patterns:
+                  new = re.sub(pattern, replacement, new)
+              if new != old:
+                  path.write_text(new)
+                  changed.append(str(path))
+
+          if not changed:
+              raise SystemExit("compileSdk 36 was not found")
+
+          print("Updated:", changed)
+          PY
 
       - name: Build APK
         run: |
@@ -46,3 +85,4 @@ jobs:
         with:
           name: Chess-Alomgir-Tournament-APK
           path: project/**/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
